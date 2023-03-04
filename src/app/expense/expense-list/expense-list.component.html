@@ -1,0 +1,40 @@
+<ion-header role='banner'>
+  <ion-toolbar>
+    <ion-title>Expenses</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-refresher></ion-refresher>
+  <ion-grid class='ion-padding'>
+    <ion-row>
+      <ion-col>
+        <ion-item>
+          <ion-icon name='swap-vertical-outline' slot='start'></ion-icon>
+          <ion-select interface='popover' placeholder='Name (A-Z)'>
+            <ion-select-option value='newest first'>Created at (newest first)</ion-select-option>
+            <ion-select-option value='oldest first'>Created at (oldest first)</ion-select-option>
+            <ion-select-option value='name az'>Name (A-Z)</ion-select-option>
+            <ion-select-option value='name za'>Name (Z-A)</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-col>
+      <ion-col>
+        <ion-item>
+          <ion-icon name="pricetag-outline" slot='start'></ion-icon>
+         <ion-select placeholder='Category'></ion-select>
+        </ion-item>
+      </ion-col>
+      <ion-col>
+        <ion-item>
+          <ion-icon name='search-outline' slot='start'></ion-icon>
+          <ion-input placeholder='Search'></ion-input>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <ion-list [inset]='true'>
+    <ion-item button detail='true' (click)='openModal()'>
+      <ion-label></ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
