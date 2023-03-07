@@ -21,13 +21,13 @@
         <ion-col>
           <ion-item>
             <ion-icon name='search-outline' slot='start'></ion-icon>
-            <ion-input placeholder='Search'></ion-input>
+            <ion-input maxlength='40' placeholder='Search' [clearInput]='true'></ion-input>
           </ion-item>
         </ion-col>
       </ion-row>
     </ion-grid>
     <ion-list [inset]='true'>
-      <ion-item button detail='true' (click)='openModal()'>
+      <ion-item button [detail]='true' (click)='openModal()'>
         <ion-label role='listitem'></ion-label>
       </ion-item>
     </ion-list>
