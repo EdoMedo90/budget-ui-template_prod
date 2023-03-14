@@ -1,40 +1,63 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>Categories</ion-title>
+    <ion-progress-bar *ngIf='loading' type='indeterminate'></ion-progress-bar>
   </ion-toolbar>
 </ion-header>
 <ion-content>
   <ion-refresher slot='fixed'></ion-refresher>
-    <ion-grid class='ion-padding'>
-      <ion-row>
-        <ion-col>
-          <ion-item>
-            <ion-icon name='swap-vertical-outline' slot='start'></ion-icon>
-            <ion-select interface='popover' placeholder='Name (A-Z)'>
-              <ion-select-option value='newest first'>Created at (newest first)</ion-select-option>
-              <ion-select-option value='oldest first'>Created at (oldest first)</ion-select-option>
-              <ion-select-option value='name az'>Name (A-Z)</ion-select-option>
-              <ion-select-option value='name za'>Name (Z-A)</ion-select-option>
-            </ion-select>
-          </ion-item>
-        </ion-col>
-        <ion-col>
-          <ion-item>
-            <ion-icon name='search-outline' slot='start'></ion-icon>
-            <ion-input maxlength='40' placeholder='Search' [clearInput]='true'></ion-input>
-          </ion-item>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-    <ion-list [inset]='true'>
-      <ion-item button [detail]='true' (click)='openModal()'>
-        <ion-label role='listitem'></ion-label>
+  <ion-grid class='ion-padding'>
+    <ion-row>
+      <ion-col>
+        <ion-item>
+          <ion-icon name='swap-vertical-outline' slot='start'></ion-icon>
+          <ion-select interface='popover' placeholder='Name (A-Z)'>
+            <ion-select-option value='newest first'>Created at (newest first)</ion-select-option>
+            <ion-select-option value='oldest first'>Created at (oldest first)</ion-select-option>
+            <ion-select-option value='name az'>Name (A-Z)</ion-select-option>
+            <ion-select-option value='name za'>Name (Z-A)</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-col>
+      <ion-col>
+        <ion-item>
+          <ion-icon name='search-outline' slot='start'></ion-icon>
+          <ion-input maxlength='40' placeholder='Search' [clearInput]='true'></ion-input>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <ion-list [ngSwitch]='categories?.length' inset='true'>
+    <!-- Skeleton -->
+    <ng-container *ngSwitchCase='null'>
+      <ion-item *ngFor='let i of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]'>
+        <ion-label>
+          <ion-skeleton-text [animated]='true' style='width: 80px'></ion-skeleton-text>
+        </ion-label>
       </ion-item>
-    </ion-list>
-    <ion-fab slot='fixed' vertical='bottom' horizontal='end'>
-      <ion-fab-button button detail='true' (click)='openModal()'>
-        <ion-icon name='add'></ion-icon>
-      </ion-fab-button>
-    </ion-fab>
+    </ng-container>
+    <!-- Empty list -->
+    <ion-item *ngSwitchCase='0'>
+      <ion-icon slot='start' name='alert-circle-outline'></ion-icon>
+      <ion-label>
+        No categories found
+      </ion-label>
+    </ion-item>
+    <!-- Categories -->
+    <ng-container *ngSwitchDefault>
+      <ion-item button='true' *ngFor='let category of categories' [detail]='true' [disabled]='loading'
+                (click)='openModal(category)'>
+        <ion-label>
+          {{category.name}}
+        </ion-label>
+      </ion-item>
+    </ng-container>
+  </ion-list>
+  <ion-fab slot='fixed' vertical='bottom' horizontal='end'>
+    <ion-fab-button button detail='true' (click)='openModal()'>
+      <ion-icon name='add'></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>
+
 

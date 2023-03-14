@@ -26,10 +26,12 @@ export class CategoryModalComponent {
     })
   }
 
+  category: Category = {} as Category;
+  readonly categoryForm: FormGroup;
+  submitting = false;
   cancel(): void {
     this.modalCtrl.dismiss(null, 'cancel');
   }
-
   save(): void {
     this.submitting = true;
     this.categoryService.upsertCategory(this.categoryForm.value).subscribe({
@@ -43,9 +45,7 @@ export class CategoryModalComponent {
         this.submitting = false;
       }
     })
-    this.modalCtrl.dismiss(null, 'save');
   }
-
   delete(): void {
     from(this.actionSheetService.showDeletionConfirmation('Are you sure you want to delete this category?'))
       .pipe(filter((action) => action === 'delete'))
@@ -55,7 +55,4 @@ export class CategoryModalComponent {
         },
       });
   }
-  category: Category = {} as Category;
-  readonly categoryForm: FormGroup;
-  submitting = false;
 }
