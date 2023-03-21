@@ -9,29 +9,29 @@ import {loginPath} from "../routes";
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   constructor(
-    private readonly fireauth: AngularFireAuth,
+    private readonly fireAuth: AngularFireAuth,
     private readonly toast: ToastController,
     private readonly router: Router
   ) {}
 
-  currentUser = (): Observable<firebase.User | null> => this.fireauth.user;
+  currentUser = (): Observable<firebase.User | null> => this.fireAuth.user;
 
   loginWithGithub = (next?: () => void): void => {
-    from(this.fireauth.signInWithPopup(new firebase.auth.GithubAuthProvider())).subscribe({
+    from(this.fireAuth.signInWithPopup(new firebase.auth.GithubAuthProvider())).subscribe({
       next: next || (() => {}),
       error: (error) => this.displayLoginError(error),
     });
   };
 
   loginWithGoogle = (next?: () => void): void => {
-    from(this.fireauth.signInWithPopup(new firebase.auth.GoogleAuthProvider())).subscribe({
+    from(this.fireAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider())).subscribe({
       next: next || (() => {}),
       error: (error) => this.displayLoginError(error),
     });
   };
 
   logout = (): void => {
-    this.fireauth.signOut();
+    this.fireAuth.signOut();
     this.router.navigate([`/${loginPath}`]);
   };
 
