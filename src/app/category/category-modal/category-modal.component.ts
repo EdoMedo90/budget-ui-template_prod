@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ModalController } from '@ionic/angular';
 import { ActionSheetService } from '../../shared/service/action-sheet.service';
-import { filter, from } from 'rxjs';
+import { filter, from, mergeMap } from 'rxjs';
 import { CategoryService } from '../category.service';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ToastService} from '../../shared/service/toast.service';
@@ -12,7 +12,10 @@ import { FormGroup} from '@angular/forms';
   selector: 'app-category-modal',
   templateUrl: './category-modal.component.html',
 })
-export class CategoryModalComponent {
+export class CategoryModalComponent implements OnInit {
+  ngOnInit(): void {
+    this.categoryForm.patchValue(this.category);
+  }
 
   constructor(
     private readonly actionSheetService: ActionSheetService,
@@ -22,8 +25,9 @@ export class CategoryModalComponent {
     private readonly toastService: ToastService
   ) {
     this.categoryForm = this.formBuilder.group({
-      name: ['', [Validators.required, Validators.maxLength(40)]]
-    })
+      id: [], //hidden
+      name: ['', [Validators.required, Validators.maxLength(40)]],
+    });
   }
 
   category: Category = {} as Category;
@@ -43,15 +47,27 @@ export class CategoryModalComponent {
       error: (error) => {
         this.toastService.displayErrorToast('Could not save category', error);
         this.submitting = false;
-      }
-    })
+      },
+    });
   }
   delete(): void {
     from(this.actionSheetService.showDeletionConfirmation('Are you sure you want to delete this category?'))
-      .pipe(filter((action) => action === 'delete'))
-      .subscribe({
+      .pipe(
+        filter((action) => action === 'delete'),
+        mergeMap(() => {
+      this.submitting = true;
+      return this.categoryService.deleteCategory(this.category.id!);
+    })
+  )
+        .subscribe({
         next: () => {
-          this.modalCtrl.dismiss(null, 'delete');
+          this.toastService.displaySuccessToast('Category deleted');
+          this.modalCtrl.dismiss(null, 'refresh');
+          this.submitting = false;
+        },
+        error: (error) => {
+          this.toastService.displayErrorToast('Could not delete category', error);
+          this.submitting = false;
         },
       });
   }

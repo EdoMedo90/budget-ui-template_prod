@@ -1,35 +1,58 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CategoryModalComponent } from '../category-modal/category-modal.component';
 import { InfiniteScrollCustomEvent, ModalController, RefresherCustomEvent } from '@ionic/angular';
-import { Category, CategoryCriteria } from '../../shared/domain';
+import { Category, CategoryCriteria, SortOption } from '../../shared/domain';
 import { CategoryService } from '../category.service';
 import { ToastService } from '../../shared/service/toast.service';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { debounce, interval, Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-category-list',
   templateUrl: './category-list.component.html',
 })
-export class CategoryListComponent implements OnInit {
-  constructor(
-    private readonly modalCtrl: ModalController,
-    private readonly categoryService: CategoryService,
-    private readonly toastService: ToastService
-) {}
 
-  categories: Category[] = [];
+export class CategoryListComponent implements OnInit, OnDestroy {
+  categories: Category[] | null = null;
   readonly initialSort = 'name,asc';
   lastPageReached = false;
   loading = false;
   searchCriteria: CategoryCriteria = { page: 0, size: 25, sort: this.initialSort};
+  readonly searchForm: FormGroup;
+  readonly sortOptions: SortOption[] = [
+    { label: 'Created at (newest first)', value: 'createdAt,desc' },
+    { label: 'Created at (oldest first)', value: 'createdAt,asc' },
+    { label: 'Name (A-Z)', value: 'name,asc' },
+    { label: 'Name (Z-A)', value: 'name,desc' },
+  ];
+  private readonly unsubscribe = new Subject<void>();
+    constructor(
+    private readonly modalCtrl: ModalController,
+    private readonly categoryService: CategoryService,
+    private readonly toastService: ToastService,
+    private readonly formBuilder: FormBuilder,
+) {
+    this.searchForm = this.formBuilder.group({name: [], sort: [this.initialSort]});
+    this.searchForm.valueChanges
+      .pipe(
+        takeUntil(this.unsubscribe),
+        debounce((value) => (value.name?.length ? interval(400) : interval(0)))
+      )
+      .subscribe((value) => {
+        this.searchCriteria = { ...this.searchCriteria, ...value, page: 0 };
+        this.loadCategories();
+      })
+    }
+
   async openModal(category?: Category): Promise<void> {
-    const modal = await this.modalCtrl.create({ component: CategoryModalComponent });
+    const modal = await this.modalCtrl.create({ component: CategoryModalComponent,
+    componentProps: { category: category ? { ...category} : {}},
+    });
     modal.present();
     const { role } = await modal.onWillDismiss();
     if (role === 'refresh') this.loadCategories();
     console.log('role', role);
   }
-
-
   private loadCategories(next: () => void = () => {}): void {
     if (!this.searchCriteria.name) delete this.searchCriteria.name;
     this.loading = true;
@@ -50,6 +73,10 @@ export class CategoryListComponent implements OnInit {
   ngOnInit(): void {
     this.loadCategories();
   }
+  ngOnDestroy(): void {
+      this.unsubscribe.next();
+      this.unsubscribe.complete();
+  }
   loadNextCategoryPage($event: any) {
     this.searchCriteria.page++;
     this.loadCategories(() => ($event as InfiniteScrollCustomEvent).target.complete());
@@ -59,4 +86,7 @@ export class CategoryListComponent implements OnInit {
     this.loadCategories(() => ($event ? ($event as RefresherCustomEvent).target.complete() : {}));
   }
 }
+
+
+
 

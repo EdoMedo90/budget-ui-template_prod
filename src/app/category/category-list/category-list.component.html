@@ -5,24 +5,23 @@
   </ion-toolbar>
 </ion-header>
 <ion-content>
-  <ion-refresher slot='fixed'></ion-refresher>
-  <ion-grid class='ion-padding'>
+  <ion-refresher slot='fixed' (ionRefresh)='reloadCategories($event)' [disabled]='loading'></ion-refresher>
+  <ion-grid class='ion-padding' [formGroup]='searchForm'>
     <ion-row>
-      <ion-col>
+      <ion-col size='12' size-sm='6'>
         <ion-item>
           <ion-icon name='swap-vertical-outline' slot='start'></ion-icon>
-          <ion-select interface='popover' placeholder='Name (A-Z)'>
-            <ion-select-option value='newest first'>Created at (newest first)</ion-select-option>
-            <ion-select-option value='oldest first'>Created at (oldest first)</ion-select-option>
-            <ion-select-option value='name az'>Name (A-Z)</ion-select-option>
-            <ion-select-option value='name za'>Name (Z-A)</ion-select-option>
+          <ion-select interface='popover' formControlName='sort'>
+            <ion-select-option *ngFor='let sortOption of sortOptions' [value]='sortOption.value'>
+              {{sortOption.label}}
+            </ion-select-option>
           </ion-select>
         </ion-item>
       </ion-col>
-      <ion-col>
+      <ion-col size='12' size-sm='6'>
         <ion-item>
           <ion-icon name='search-outline' slot='start'></ion-icon>
-          <ion-input maxlength='40' placeholder='Search' [clearInput]='true'></ion-input>
+          <ion-input maxlength='40' placeholder='Search' [clearInput]='true' formControlName='name'></ion-input>
         </ion-item>
       </ion-col>
     </ion-row>
@@ -36,14 +35,12 @@
         </ion-label>
       </ion-item>
     </ng-container>
-    <!-- Empty list -->
     <ion-item *ngSwitchCase='0'>
       <ion-icon slot='start' name='alert-circle-outline'></ion-icon>
       <ion-label>
         No categories found
       </ion-label>
     </ion-item>
-    <!-- Categories -->
     <ng-container *ngSwitchDefault>
       <ion-item button='true' *ngFor='let category of categories' [detail]='true' [disabled]='loading'
                 (click)='openModal(category)'>
@@ -53,6 +50,9 @@
       </ion-item>
     </ng-container>
   </ion-list>
+  <ion-infinite-scroll [disabled]="lastPageReached || loading" (ionInfinite)="loadNextCategoryPage($event)">
+    <ion-infinite-scroll-content></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
   <ion-fab slot='fixed' vertical='bottom' horizontal='end'>
     <ion-fab-button button detail='true' (click)='openModal()'>
       <ion-icon name='add'></ion-icon>
