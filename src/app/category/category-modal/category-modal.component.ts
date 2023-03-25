@@ -16,7 +16,7 @@ export class CategoryModalComponent implements OnInit {
   ngOnInit(): void {
     this.categoryForm.patchValue(this.category);
   }
-
+  category: Category = {} as Category;
   constructor(
     private readonly actionSheetService: ActionSheetService,
     private readonly categoryService: CategoryService,
@@ -30,7 +30,7 @@ export class CategoryModalComponent implements OnInit {
     });
   }
 
-  category: Category = {} as Category;
+
   readonly categoryForm: FormGroup;
   submitting = false;
   cancel(): void {

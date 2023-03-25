@@ -8,7 +8,8 @@
     </ion-buttons>
     <ion-title>Add Expense</ion-title>
     <ion-buttons slot='end'>
-      <ion-button type='button' color='medium' (click)='save()'>
+      <ion-button type='button' color='medium' (click)='save()'
+                  [disabled]='expenseForm.pristine || expenseForm.invalid || submitting'>
         <ion-icon slot='start' name='save'></ion-icon>
         Save
       </ion-button>
@@ -23,6 +24,9 @@
   <ion-item>
     <ion-icon slot='start' name='pricetag'></ion-icon>
     <ion-select placeholder='Choose a category'>
+      <ion-select-option *ngFor='let category of categories' [value]='category.id'>
+        {{category.name}}
+      </ion-select-option>
     </ion-select>
     <ion-button slot='end'>
       <ion-icon slot='icon-only' name='add'></ion-icon>
