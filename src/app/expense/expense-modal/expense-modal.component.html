@@ -38,10 +38,10 @@
   </ion-item>
   <ion-item>
     <ion-icon slot='start' name='calendar'></ion-icon>
-    <ion-datetime-button datetime='datetime'  formcontrolName='date'></ion-datetime-button>
+    <ion-datetime-button datetime='datetime'></ion-datetime-button>
     <ion-modal [keepContentsMounted]='true'>
       <ng-template>
-        <ion-datetime presentation='date' id='datetime'></ion-datetime>
+        <ion-datetime presentation='date' id='datetime' formControlName='date'></ion-datetime>
       </ng-template>
     </ion-modal>
   </ion-item>
