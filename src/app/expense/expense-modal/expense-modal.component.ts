@@ -3,12 +3,12 @@ import { ModalController } from '@ionic/angular';
 import { BehaviorSubject, filter, from, mergeMap } from 'rxjs';
 import { CategoryModalComponent } from '../../category/category-modal/category-modal.component';
 import { ActionSheetService } from '../../shared/service/action-sheet.service';
-import { Category, Expense, SortOption } from '../../shared/domain';
+import { Category, Expense, ExpenseUpsertDto, SortOption } from '../../shared/domain';
 import { CategoryService } from '../../category/category.service';
 import { ToastService } from '../../shared/service/toast.service';
 import { FormBuilder, FormGroup, isFormGroup, Validators } from '@angular/forms';
 import { ExpenseService } from '../expense.service';
-import { format, parseISO } from 'date-fns';
+import { format, formatISO, parseISO } from 'date-fns';
 
 
 @Component({
@@ -30,7 +30,10 @@ export class ExpenseModalComponent implements OnInit {
   ) {
     this.expenseForm = this.formBuilder.group({
       id: [], //hidden
+      categoryId: [],
       name: ['', [Validators.required, Validators.maxLength(40)]],
+      amount: [],
+      date: [formatISO(new Date())],
     })
   }
   readonly expenseForm: FormGroup;
