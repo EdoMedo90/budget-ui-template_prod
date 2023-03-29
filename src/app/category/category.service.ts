@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Category, Page, PagingCriteria } from '../shared/domain';
+import { Category, ExpenseUpsertDto, Page, PagingCriteria } from '../shared/domain';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })

@@ -1,12 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { addMonths, set } from 'date-fns';
-import { ModalController } from '@ionic/angular';
+import { ModalController, RefresherCustomEvent } from '@ionic/angular';
 import { ExpenseModalComponent } from '../expense-modal/expense-modal.component';
-import { CategoryCriteria, Expense, ExpenseCriteria } from '../../shared/domain';
+import { Category, CategoryCriteria, Expense, ExpenseCriteria, SortOption } from '../../shared/domain';
 import { formatPeriod } from '../../shared/period';
-import { from, groupBy, mergeMap, toArray } from 'rxjs';
+import { BehaviorSubject, debounce, from, groupBy, interval, mergeMap, Subject, takeUntil, toArray } from 'rxjs';
 import { ToastService } from '../../shared/service/toast.service';
 import { ExpenseService } from '../expense.service';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { CategoryService } from '../../category/category.service';
 
 interface ExpenseGroup {
   date: string;
@@ -16,25 +18,44 @@ interface ExpenseGroup {
   selector: 'app-expense-overview',
   templateUrl: './expense-list.component.html',
 })
-export class ExpenseListComponent {
+export class ExpenseListComponent implements OnInit, OnDestroy {
   date = set(new Date(), { date: 1 });
   expenseGroups: ExpenseGroup[] | null = null;
   readonly initialSort = 'name,asc';
   lastPageReached = false;
   loading = false;
+  searchCriteria: ExpenseCriteria = { page: 0, size: 25, sort: this.initialSort };
 
-  searchCriteria: ExpenseCriteria = { page: 0, size: 25, sort: this.initialSort};
+  categories: Category[] = [];
 
-
+  readonly searchForm: FormGroup;
+  readonly sortOptions: SortOption[] = [
+    { label: 'Created at (newest first)', value: 'createdAt,desc' },
+    { label: 'Created at (oldest first)', value: 'createdAt,asc' },
+    { label: 'Name (A-Z)', value: 'name,asc' },
+    { label: 'Name (Z-A)', value: 'name,desc' },
+  ];
+  private readonly unsubscribe = new Subject<void>();
   constructor(
     private readonly modalCtrl: ModalController,
     private readonly toastService: ToastService,
+    private readonly categoryService: CategoryService,
     private readonly expenseService: ExpenseService,
-  ) {}
+    private readonly formBuilder: FormBuilder,
+  ) {
+    this.searchForm = this.formBuilder.group({name: [], sort: [this.initialSort]});
+    this.searchForm.valueChanges
+      .pipe(
+        takeUntil(this.unsubscribe),
+        debounce((value) => (value.name?.length ? interval(400) : interval(0)))
+      )
+      .subscribe((value) => {
+        this.searchCriteria = { ...this.searchCriteria, ...value, page: 0 };
+        this.loadExpenses();
+      })
+  }
 
-  addMonths = (number: number): void => {
-    this.date = addMonths(this.date, number);
-  };
+
 
   async openModal(expense?: Expense): Promise<void> {
     const modal = await this.modalCtrl.create({
@@ -44,6 +65,21 @@ export class ExpenseListComponent {
     modal.present();
     const { role } = await modal.onWillDismiss();
     console.log('role', role);
+  }
+
+
+  private loadAllCategories(): void {
+    const pageToLoad = new BehaviorSubject(0);
+    pageToLoad
+      .pipe(mergeMap((page) => this.categoryService.getCategories({ page, size: 25, sort: 'name,asc'})))
+      .subscribe({
+        next: (categories) => {
+          if (pageToLoad.value === 0) this.categories = [];
+          this.categories.push(...categories.content);
+          if (!categories.last) pageToLoad.next(pageToLoad.value + 1);
+        },
+        error: (error) => this.toastService.displayErrorToast('Could not load categories', error),
+      });
   }
   private loadExpenses(next: () => void = () => {}): void {
     this.searchCriteria.yearMonth = formatPeriod(this.date);
@@ -84,8 +120,22 @@ export class ExpenseListComponent {
         },
       });
   }
+  addMonths = (number: number): void => {
+    this.date = addMonths(this.date, number);
+  };
 
   private sortExpenses = (expenses: Expense[]): Expense[] => expenses.sort((a, b) => a.name.localeCompare(b.name));
+
+  ngOnInit(): void {
+    this.loadExpenses();
+    this.loadAllCategories();
+  }
+  ngOnDestroy(): void {
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
+  }
+  reloadExpenses($event?: any): void {
+    this.searchCriteria.page = 0;
+    this.loadExpenses(() => ($event ? ($event as RefresherCustomEvent).target.complete() : {}));
+  }
 }
-
-
