@@ -6,7 +6,10 @@
         Cancel
       </ion-button>
     </ion-buttons>
-    <ion-title>Add category</ion-title>
+    <ion-title>
+      <div *ngIf="category.id; else elseBlock">Edit Category</div>
+      <ng-template #elseBlock>Add Category</ng-template>
+    </ion-title>
     <ion-buttons slot='end'>
       <ion-button type='button' color='medium' (click)='save()'
                   [disabled]='categoryForm.pristine || categoryForm.invalid || submitting'>

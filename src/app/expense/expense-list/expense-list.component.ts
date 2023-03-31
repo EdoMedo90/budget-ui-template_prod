@@ -34,6 +34,8 @@ export class ExpenseListComponent implements OnInit, OnDestroy {
     { label: 'Created at (oldest first)', value: 'createdAt,asc' },
     { label: 'Name (A-Z)', value: 'name,asc' },
     { label: 'Name (Z-A)', value: 'name,desc' },
+    { label: 'Date (newest first)', value: 'date,desc'},
+    { label: 'Date (oldest first)', value: 'date,asc'},
   ];
   private readonly unsubscribe = new Subject<void>();
   constructor(
@@ -58,12 +60,12 @@ export class ExpenseListComponent implements OnInit, OnDestroy {
 
 
   async openModal(expense?: Expense): Promise<void> {
-    const modal = await this.modalCtrl.create({
-      component: ExpenseModalComponent,
-      componentProps: { expense: expense ? { ...expense } : {} },
+    const modal = await this.modalCtrl.create({ component: ExpenseModalComponent,
+      componentProps: { expense: expense ? { ...expense } : {}},
     });
     modal.present();
     const { role } = await modal.onWillDismiss();
+    if (role === 'refresh') this.loadExpenses();
     console.log('role', role);
   }
 

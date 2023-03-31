@@ -6,7 +6,10 @@
         Cancel
       </ion-button>
     </ion-buttons>
-    <ion-title>Add Expense</ion-title>
+    <ion-title>
+      <div *ngIf="expense.id; else elseBlock">Edit Expense</div>
+      <ng-template #elseBlock>Add Expense</ng-template>
+    </ion-title>
     <ion-buttons slot='end'>
       <ion-button type='button' color='medium' (click)='save()'>
         <ion-icon slot='start' name='save'></ion-icon>
@@ -22,8 +25,8 @@
   </ion-item>
   <ion-item>
     <ion-icon slot='start' name='pricetag'></ion-icon>
-    <ion-select placeholder='Choose a category'>
-      <ion-select-option *ngFor='let category of categories' [value]='category.id'>
+    <ion-select interface='popover'  placeholder='Choose a category'>
+      <ion-select-option role='option' *ngFor='let category of categories' [value]='category.id'>
         {{category.name}}
       </ion-select-option>
     </ion-select>

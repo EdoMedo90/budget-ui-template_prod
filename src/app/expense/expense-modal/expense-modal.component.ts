@@ -17,6 +17,7 @@ import { format, formatISO, parseISO } from 'date-fns';
 })
 export class ExpenseModalComponent implements OnInit {
 
+
   categories: Category[] = [];
   expense: Expense = {} as Expense;
 
@@ -40,6 +41,7 @@ export class ExpenseModalComponent implements OnInit {
   submitting = false;
   ngOnInit(): void {
     this.loadAllCategories();
+    this.expenseForm.patchValue(this.expense);
   }
     private loadAllCategories(): void {
     const pageToLoad = new BehaviorSubject(0);
