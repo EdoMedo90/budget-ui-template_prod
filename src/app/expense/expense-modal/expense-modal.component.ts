@@ -9,6 +9,7 @@ import { ToastService } from '../../shared/service/toast.service';
 import { FormBuilder, FormGroup, isFormGroup, Validators } from '@angular/forms';
 import { ExpenseService } from '../expense.service';
 import { format, formatISO, parseISO } from 'date-fns';
+import { ca } from 'date-fns/locale';
 
 
 @Component({
@@ -16,6 +17,12 @@ import { format, formatISO, parseISO } from 'date-fns';
   templateUrl: './expense-modal.component.html',
 })
 export class ExpenseModalComponent implements OnInit {
+  ngOnInit(): void {
+    const { id, amount, category, date, name } = this.expense;
+    if (category) this.categories.push(category);
+    if (id) this.expenseForm.patchValue({ id, amount, categoryId: category?.id, date, name });
+    this.loadAllCategories();
+  }
 
 
   categories: Category[] = [];
@@ -35,14 +42,11 @@ export class ExpenseModalComponent implements OnInit {
       name: ['', [Validators.required, Validators.maxLength(40)]],
       amount: [],
       date: [formatISO(new Date())],
-    })
+    });
   }
   readonly expenseForm: FormGroup;
   submitting = false;
-  ngOnInit(): void {
-    this.loadAllCategories();
-    this.expenseForm.patchValue(this.expense);
-  }
+
     private loadAllCategories(): void {
     const pageToLoad = new BehaviorSubject(0);
     pageToLoad
