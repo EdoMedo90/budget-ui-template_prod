@@ -1,7 +1,7 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot='start' (click)='cancel()'>
-      <ion-button type='button' color='medium'>
+      <ion-button type='button' color='medium' [disabled]='submitting'>
         <ion-icon slot='start' name='close'></ion-icon>
         Cancel
       </ion-button>
@@ -11,7 +11,8 @@
       <ng-template #elseBlock>Add Expense</ng-template>
     </ion-title>
     <ion-buttons slot='end'>
-      <ion-button type='button' color='medium' (click)='save()'>
+      <ion-button type='button' color='medium' (click)='save()'
+                  [disabled]='expenseForm.pristine || expenseForm.invalid || submitting'>
         <ion-icon slot='start' name='save'></ion-icon>
         Save
       </ion-button>
@@ -21,7 +22,7 @@
 <ion-content class='ion-padding' [formGroup]='expenseForm'>
   <ion-item>
     <ion-icon slot='start' name='text'></ion-icon>
-    <ion-input placeholder="Enter the expense's name" formControlName='name'></ion-input>
+    <ion-input placeholder="Enter the expense's name" formControlName='name' [disabled]='submitting'></ion-input>
   </ion-item>
   <ion-item>
     <ion-icon slot='start' name='pricetag'></ion-icon>

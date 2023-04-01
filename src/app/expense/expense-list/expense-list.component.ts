@@ -21,7 +21,7 @@ interface ExpenseGroup {
 export class ExpenseListComponent implements OnInit, OnDestroy {
   date = set(new Date(), { date: 1 });
   expenseGroups: ExpenseGroup[] | null = null;
-  readonly initialSort = 'name,asc';
+  readonly initialSort = 'date,desc';
   lastPageReached = false;
   loading = false;
   searchCriteria: ExpenseCriteria = { page: 0, size: 25, sort: this.initialSort };

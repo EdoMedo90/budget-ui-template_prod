@@ -54,7 +54,7 @@
     <ng-container *ngSwitchDefault>
       <ion-item-group *ngFor='let expenseGroup of expenseGroups'>
         <ion-item-divider>
-          <ion-label>{{expenseGroup.date}}</ion-label>
+          <ion-label>{{expenseGroup.date | date:'dd.MM.yyyy'}}</ion-label>
         </ion-item-divider>
         <ion-item button='true' *ngFor='let expense of expenseGroup.expenses' [detail]='true' [disabled]='loading'
                   (click)='openModal(expense)'>
@@ -62,7 +62,7 @@
             <ion-grid>
               <ion-row>
                 <ion-col>{{expense.name}}</ion-col>
-                <ion-col></ion-col>
+                <ion-col class='ion-text-center'   >{{expense.category}}</ion-col>
                 <ion-col class='ion-text-end'>{{expense.amount | currency:'CHF'}}</ion-col>
               </ion-row>
             </ion-grid>
