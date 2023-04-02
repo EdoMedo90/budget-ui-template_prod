@@ -21,8 +21,8 @@
       <ion-col>
         <ion-item>
           <ion-icon name='pricetag-outline' slot='start'></ion-icon>
-          <ion-select placeholder='Category' interface='popover' multiple='true' formControlName='name'>
-            <ion-select-option *ngFor='let category of categories' [value]='category.name'>
+          <ion-select placeholder='Category' interface='popover' multiple='true' formControlName='categoryIds'>
+            <ion-select-option role='option' *ngFor='let category of categories' [value]='category.id'>
               {{category.name}}
             </ion-select-option>
           </ion-select>

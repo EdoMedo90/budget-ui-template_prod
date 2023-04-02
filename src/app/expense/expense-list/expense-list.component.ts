@@ -45,7 +45,7 @@ export class ExpenseListComponent implements OnInit, OnDestroy {
     private readonly expenseService: ExpenseService,
     private readonly formBuilder: FormBuilder,
   ) {
-    this.searchForm = this.formBuilder.group({name: [], sort: [this.initialSort]});
+    this.searchForm = this.formBuilder.group({name: [], categoryIds: [], sort: [this.initialSort]});
     this.searchForm.valueChanges
       .pipe(
         takeUntil(this.unsubscribe),
