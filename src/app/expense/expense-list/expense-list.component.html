@@ -21,8 +21,8 @@
       <ion-col>
         <ion-item>
           <ion-icon name='pricetag-outline' slot='start'></ion-icon>
-          <ion-select placeholder='Category' formControlName='name'>
-            <ion-select-option *ngFor='let category of categories' [value]='category.name'>
+          <ion-select placeholder='Category' interface='popover' multiple='true' formControlName='categoryIds'>
+            <ion-select-option role='option' *ngFor='let category of categories' [value]='category.id'>
               {{category.name}}
             </ion-select-option>
           </ion-select>
@@ -48,13 +48,13 @@
     <ion-item *ngSwitchCase='0'>
       <ion-icon slot='start' name='alert-circle-outline'></ion-icon>
       <ion-label>
-        No categories found
+        No expenses found
       </ion-label>
     </ion-item>
     <ng-container *ngSwitchDefault>
       <ion-item-group *ngFor='let expenseGroup of expenseGroups'>
         <ion-item-divider>
-          <ion-label>{{expenseGroup.date}}</ion-label>
+          <ion-label>{{expenseGroup.date | date:'dd.MM.yyyy'}}</ion-label>
         </ion-item-divider>
         <ion-item button='true' *ngFor='let expense of expenseGroup.expenses' [detail]='true' [disabled]='loading'
                   (click)='openModal(expense)'>
@@ -62,7 +62,9 @@
             <ion-grid>
               <ion-row>
                 <ion-col>{{expense.name}}</ion-col>
-                <ion-col>{{expense.category}}</ion-col>
+                <ion-col class='ion-text-center'>
+                  <ion-icon name='pricetag'></ion-icon>
+                  {{expense.category?.name}}</ion-col>
                 <ion-col class='ion-text-end'>{{expense.amount | currency:'CHF'}}</ion-col>
               </ion-row>
             </ion-grid>
@@ -71,6 +73,9 @@
       </ion-item-group>
     </ng-container>
   </ion-list>
+  <ion-infinite-scroll [disabled]="lastPageReached || loading" (ionInfinite)="loadNextExpensePage($event)">
+    <ion-infinite-scroll-content></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
   <ion-fab slot='fixed' vertical='bottom' horizontal='end'>
     <ion-fab-button button detail='true' (click)='openModal()'>
       <ion-icon name='add'></ion-icon>

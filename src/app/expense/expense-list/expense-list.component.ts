@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { addMonths, set } from 'date-fns';
-import { ModalController, RefresherCustomEvent } from '@ionic/angular';
+import { InfiniteScrollCustomEvent, ModalController, RefresherCustomEvent } from '@ionic/angular';
 import { ExpenseModalComponent } from '../expense-modal/expense-modal.component';
 import { Category, CategoryCriteria, Expense, ExpenseCriteria, SortOption } from '../../shared/domain';
 import { formatPeriod } from '../../shared/period';
@@ -21,7 +21,7 @@ interface ExpenseGroup {
 export class ExpenseListComponent implements OnInit, OnDestroy {
   date = set(new Date(), { date: 1 });
   expenseGroups: ExpenseGroup[] | null = null;
-  readonly initialSort = 'name,asc';
+  readonly initialSort = 'date,desc';
   lastPageReached = false;
   loading = false;
   searchCriteria: ExpenseCriteria = { page: 0, size: 25, sort: this.initialSort };
@@ -34,6 +34,8 @@ export class ExpenseListComponent implements OnInit, OnDestroy {
     { label: 'Created at (oldest first)', value: 'createdAt,asc' },
     { label: 'Name (A-Z)', value: 'name,asc' },
     { label: 'Name (Z-A)', value: 'name,desc' },
+    { label: 'Date (newest first)', value: 'date,desc'},
+    { label: 'Date (oldest first)', value: 'date,asc'},
   ];
   private readonly unsubscribe = new Subject<void>();
   constructor(
@@ -43,7 +45,7 @@ export class ExpenseListComponent implements OnInit, OnDestroy {
     private readonly expenseService: ExpenseService,
     private readonly formBuilder: FormBuilder,
   ) {
-    this.searchForm = this.formBuilder.group({name: [], sort: [this.initialSort]});
+    this.searchForm = this.formBuilder.group({name: [], categoryIds: [], sort: [this.initialSort]});
     this.searchForm.valueChanges
       .pipe(
         takeUntil(this.unsubscribe),
@@ -58,12 +60,12 @@ export class ExpenseListComponent implements OnInit, OnDestroy {
 
 
   async openModal(expense?: Expense): Promise<void> {
-    const modal = await this.modalCtrl.create({
-      component: ExpenseModalComponent,
-      componentProps: { expense: expense ? { ...expense } : {} },
+    const modal = await this.modalCtrl.create({ component: ExpenseModalComponent,
+      componentProps: { expense: expense ? { ...expense } : {}},
     });
     modal.present();
     const { role } = await modal.onWillDismiss();
+    if (role === 'refresh') this.loadExpenses();
     console.log('role', role);
   }
 
@@ -122,6 +124,7 @@ export class ExpenseListComponent implements OnInit, OnDestroy {
   }
   addMonths = (number: number): void => {
     this.date = addMonths(this.date, number);
+    this.reloadExpenses();
   };
 
   private sortExpenses = (expenses: Expense[]): Expense[] => expenses.sort((a, b) => a.name.localeCompare(b.name));
@@ -133,6 +136,10 @@ export class ExpenseListComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.unsubscribe.next();
     this.unsubscribe.complete();
+  }
+  loadNextExpensePage($event: any) {
+    this.searchCriteria.page++;
+    this.loadExpenses(() => ($event as InfiniteScrollCustomEvent).target.complete());
   }
   reloadExpenses($event?: any): void {
     this.searchCriteria.page = 0;
